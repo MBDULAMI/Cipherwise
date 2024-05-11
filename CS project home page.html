@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communication Portal</title>
+    <style>
+        body { 
+            font-family: Monospace, Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0;
+            padding: 0;
+            background: url('/Users/njoodalobaid/Documents/4th year Second Semster/Computer Security/Computer Security project/Background CS project.png') no-repeat center center fixed; 
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+
+        .button-panel {
+            background: rgba(0, 0, 51, 0.5); /* Dark blue background with some transparency */
+            border-radius: 8px;
+            padding: 100px;
+            margin: 10px;
+            width: 33%;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-panel:hover {
+            background-color: rgba(0, 0, 51, 1); /* Less transparency on hover */
+        }
+
+        button {
+        	width: 200px;
+            background: #473BFD;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+
+        h2 {
+            margin: 0 0 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="button-panel">
+        <h2>Monitoring Communications</h2>
+        <button onclick="window.location.href='/Users/njoodalobaid/Documents/4th year Second Semster/Computer Security/Computer Security project/CS project frequency page.html';">Start</button>
+    </div>
+    <div class="button-panel">
+        <h2>Establish a Private Communication</h2>
+        <button onclick="window.location.href='/Users/njoodalobaid/Documents/4th year Second Semster/Computer Security/Computer Security project/CS project Playfire page.html';">Start</button>
+    </div>
+    
+</body>
+</html>

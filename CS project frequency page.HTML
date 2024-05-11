@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Letter Frequency Counter</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js"></link>
+    <style>
+        body { 
+            font-family: Monospace, Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0;
+            padding: 0;
+            background: url('/Users/njoodalobaid/Documents/4th year Second Semster/Computer Security/Computer Security project/Background CS project.png') no-repeat center center fixed; 
+            background-size: cover;
+            color: white;
+            min-height: 100vh; /* Minimum height of the viewport */
+            overflow-y: auto; /* Allows scrolling */
+        }
+
+        .container {
+            background: rgba(1, 26, 107, 0.8); /* Semi-transparent dark blue */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 70%; /* More responsive width */
+            max-width: 1200px; /* Increased maximum width */
+            margin: 20px auto; /* Centering and spacing from top/bottom */
+        }
+
+        h1 {
+            text-align: center;
+            color: #FFFFFF;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        #text-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #FFFFFF;
+            resize: none; /* Prevent resizing */
+            font-size: 18px
+        }
+
+        button {
+            background: #473BFD;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+        }
+        
+        .home-button {
+            width: 100px;
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px; /* Larger icon size */
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+
+        #result {
+            width: 100%;
+            justify-content: space-between;
+            flex-wrap: wrap; /* Ensure responsiveness */
+        }
+
+        #letter-chart, #mappings {
+          width: 100%;
+          margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            color: white; /* Text color for tables */
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #666; /* Darker header */
+        }
+
+        /* Additional styling for the rest of the body */
+        html {
+            height: 100%;
+            background-color: #011A6B; /* Similar to the dark blue of the background image */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Letter Frequency Counter</h1>
+        <textarea id="text-input" rows="2" placeholder="Enter your text paragraph here..."></textarea>
+        <div>
+            <button onclick="clearEverything()">Clear Everything</button>
+            <button onclick="exportToExcel()">Export to Excel</button>
+        </div>
+        <div id="result">
+            <div>
+                <h2>Letter Counts</h2>
+                <div id="letter-counts"></div>
+                <canvas id="letter-chart"></canvas>
+            </div>
+            <div id="letter-mappings">
+                <h2>Top 5 Letters Mapped to E-T-A-I-O</h2>
+                <div id="mappings"></div>
+            </div>
+        </div>
+    </div>
+    <button class="home-button" onclick="window.location.href='/Users/njoodalobaid/Documents/4th year Second Semster/Computer Security/Computer Security project/CS project home page.html'">
+        <i class="fas fa-home"></i>
+    </button>
+        
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script>
+        var chartInstance = null;
+
+        function countLetterFrequency(text) {
+            const letterFrequency = {};
+            let totalLetters = 0;
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i].toLowerCase();
+                if (/[a-z]/.test(char)) {
+                    letterFrequency[char] = (letterFrequency[char] || 0) + 1;
+                    totalLetters++;
+                }
+            }
+
+            displayLetterCounts(letterFrequency, totalLetters);
+            drawBarChart(letterFrequency);
+            displayTopMappings(letterFrequency);
+        }
+
+        function clearEverything() {
+            document.getElementById('text-input').value = '';
+            document.getElementById('letter-counts').innerHTML = '';
+            document.getElementById('mappings').innerHTML = '';
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+            const ctx = document.getElementById('letter-chart').getContext('2d');
+            chartInstance = new Chart(ctx, {type: 'bar', data: {labels: [], datasets: [{data: []}]}});
+        }
+
+        function displayLetterCounts(letterFrequency, totalLetters) {
+            const sortedKeys = Object.keys(letterFrequency).sort();
+            let content = "<table><tr><th>Letter</th><th>Count</th><th>Percentage</th></tr>";
+            sortedKeys.forEach(letter => {
+                const percentage = ((letterFrequency[letter] / totalLetters) * 100).toFixed(2);
+                content += `<tr><td>${letter.toUpperCase()}</td><td>${letterFrequency[letter]}</td><td>${percentage}%</td></tr>`;
+            });
+            content += "</table>";
+            document.getElementById('letter-counts').innerHTML = content;
+        }
+
+        function drawBarChart(letterFrequency) {
+            const ctx = document.getElementById('letter-chart').getContext('2d');
+            const labels = Object.keys(letterFrequency).sort();
+            const data = labels.map(letter => letterFrequency[letter]);
+
+            if (chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Letter Frequency',
+                        data: data,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function displayTopMappings(letterFrequency) {
+            const sortedKeys = Object.keys(letterFrequency).sort((a, b) => letterFrequency[b] - letterFrequency[a]);
+            const mappings = ['E', 'T', 'A', 'I', 'O'];
+            let content = "<table>";
+            sortedKeys.slice(0, 5).forEach((letter, index) => {
+                content += `<tr><td>${letter.toUpperCase()}</td><td>${mappings[index]}</td></tr>`;
+            });
+            content += "</table>";
+            document.getElementById('mappings').innerHTML = content;
+        }
+
+        function exportToExcel() {
+            const letterCounts = {};
+            document.querySelectorAll('#letter-counts table tr:not(:first-child)').forEach(row => {
+                letterCounts[row.cells[0].textContent] = parseInt(row.cells[1].textContent);
+            });
+            const ws = XLSX.utils.json_to_sheet(Object.entries(letterCounts).map(([key, value]) => ({Letter: key, Frequency: value})));
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Letter Frequency');
+            XLSX.writeFile(wb, 'letter_frequency.xlsx');
+        }
+
+        const textInput = document.getElementById('text-input');
+        textInput.addEventListener('input', function() {
+            const text = this.value;
+            countLetterFrequency(text);
+        });
+    </script>
+    
+</body>
+</html>
